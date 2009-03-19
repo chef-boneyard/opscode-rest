@@ -1,0 +1,3 @@
+== opscode-rest
+
+A gem that provides...
