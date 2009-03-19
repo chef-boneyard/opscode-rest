@@ -1,3 +1,33 @@
-== opscode-rest
+== Opscode::REST
 
-A gem that provides...
+This is a wrapper around the excellent RestClient gem.  It provides for some basic User-Agent style functionality (like a simple cookie jar), does JSON inflation, and handles redirects like a web browser.  In addition, it knows how to do OpenID authentication with Opscode-style OpenID providers (used mainly for API level authentication, unattended by human beings.)
+
+To use:
+
+  r = Opscode::REST
+  r.get("http://localhost") # Requests application/json from localhost
+  
+  # Send a PUT with :one => 'two' form-encoded.
+  r.put("http://localhost", { :payload => { :one => 'two' }})
+
+  # Send a PUT with a JSON hash
+  r.put("http://localhost", { :payload => { :one => 'two'}.to_json })
+  
+  # Post is just like PUT
+  
+  # Delete is just like GET
+  
+  # Authenticate to a Chef Server as 'adam' with the secret 'monkey'.
+  #
+  # First argument is the openid consumer, second is your openid, followed by your password.
+  r.authenticate(
+    'http://localhost:4000/openid/consumer/start',    
+    'http://localhost:4001/openid/server/node/adam', 
+    'monkey'
+  )
+  
+See the RDOC for more information.
+
+== Opscode::REST::Resource
+
+This behaves exactly like RestClient::Resource.  The difference is that we utilize the Opscode::REST wrapper under the hood, and it supports the authentication method from above.
