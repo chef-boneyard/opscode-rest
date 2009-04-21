@@ -25,6 +25,12 @@ require 'opscode/rest/log'
 require 'opscode/rest/resource'
 require 'json'
 require 'uri'
+require 'mixlib/signedheaderauth'
+
+# autoload workaround for nested classes
+# module Mixlib
+#   autoload :SignedHeaderAuth, 'mixlib/signedheaderauth'
+# end
 
 module Opscode
   class REST
@@ -181,6 +187,22 @@ module Opscode
       end
       
       options[:cookies] ||= @cookies[cookie_key]
+
+      if options[:authenticate]
+        ts = options[:timestamp] || Time.now.utc.iso8601
+        sign_obj = Mixlib::SignedHeaderAuth.signing_object(:http_method=>method,:body=>options[:payload]||"",:timestamp=>ts,:user_id=>options[:user_id])
+
+        signing_description = 'version=1.0;algorithm=sha256'
+        signed = sign_obj.sign(options[:user_secret])
+        hashed_body = sign_obj.hash_body
+        options[:headers].merge!( {
+            :x_ops_sign=>signing_description,
+            :x_ops_userid=>options[:user_id],
+            :x_ops_timestamp=>ts,
+            :x_ops_content_hash=>hashed_body,
+            :authorization=>signed,
+          })
+      end
             
       req = RestClient::Request.new(
         :method => method,
@@ -206,7 +228,6 @@ module Opscode
         Opscode::REST::Log.debug("  Headers: #{req.headers.inspect}") if req.headers
         Opscode::REST::Log.debug("  Cookies: #{req.cookies.inspect}") if req.cookies
         Opscode::REST::Log.debug("  Raw    : #{req.raw_response}") 
-        Opscode::REST::Log.debug("  Payload: #{req.payload.inspect}") if req.payload
 
         response = req.execute_inner
       rescue RestClient::Redirect => e

@@ -24,7 +24,7 @@ spec = Gem::Specification.new do |s|
   s.homepage = HOMEPAGE
   
   # Uncomment this to add a dependency
-  s.add_dependency "restclient"
+  s.add_dependency "rest-client"
   s.add_dependency "mixlib-config"
   s.add_dependency "mixlib-log"
   

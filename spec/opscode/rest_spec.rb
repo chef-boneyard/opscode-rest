@@ -38,74 +38,80 @@ describe Opscode::REST do
     end
     
     it "should set the accept header to application/json if it is not set" do
-      @rest.request(:get, 'http://example.com', @options)
-      @options[:headers][:accept].should == "application/json"
+      @rest.request(:get, 'http://example.com', options)
+      options[:headers][:accept].should == "application/json"
     end
     
     it "should set the accept header to */* if it is not set explicitly for raw_responses" do
-      @options[:raw_response] = true
-      @rest.request(:get, 'http://example.com', @options)
-      @options[:headers][:accept].should == "*/*"
+      options[:raw_response] = true
+      @rest.request(:get, 'http://example.com', options)
+      options[:headers][:accept].should == "*/*"
     end
     
     it "should set the accept header to options[:headers][:accept] if it is provided" do
-      @options[:headers] = { :accept => 'bang/bang' }
-      @rest.request(:get, 'http://example.com', @options)
-      @options[:headers][:accept].should == "bang/bang"
+      options[:headers] = { :accept => 'bang/bang' }
+      @rest.request(:get, 'http://example.com', options)
+      options[:headers][:accept].should == "bang/bang"
     end
     
     it "should set the cookies to those provided directly" do
-      @options[:cookies] = { :what => 'are you doing!' }
-      @rest.request(:get, 'http://example.com', @options)
-      @options[:cookies].should == { :what => 'are you doing!' }
+      options[:cookies] = { :what => 'are you doing!' }
+      @rest.request(:get, 'http://example.com', options)
+      options[:cookies].should == { :what => 'are you doing!' }
     end
     
     it "should set the cookies to those in the cookie jar if they are not provided" do
       @rest.cookies["example.com:80"] = { :frank => "hannon" }
-      @rest.request(:get, 'http://example.com', @options)
-      @options[:cookies].should == { :frank => "hannon" }
+      @rest.request(:get, 'http://example.com', options)
+      options[:cookies].should == { :frank => "hannon" }
     end
     
     it "should set the cookies to an empty hash if there are no cookies at all" do
-      @rest.request(:get, 'http://example.com', @options)
-      @options[:cookies].should == {}
+      @rest.request(:get, 'http://example.com', options)
+      options[:cookies].should == {}
     end
 
     it "should build a RestClient::Request object" do
       RestClient::Request.should_receive(:new).and_return(@req)
-      @rest.request(:get, 'http://example.com', @options)
+      @rest.request(:get, 'http://example.com', options)
     end
     
     it "should run the request" do
       @req.should_receive(:execute_inner).once
-      @rest.request(:get, 'http://example.com', @options)
+      @rest.request(:get, 'http://example.com', options)
     end
   
     it "should set cookies if the response provided them" do
       @response.stub!(:cookies).and_return({ :edison => "liked electricity" })
       @response.stub!(:headers).and_return({ :set_cookie => true })
-      @rest.request(:get, 'http://example.com', @options)
+      @rest.request(:get, 'http://example.com', options)
       @rest.cookies['example.com:80'][:edison].should == 'liked electricity'
     end
     
-    it "should return a file descripter if a raw_response was requested" do
+    it "should return a file descriptor if a raw_response was requested" do
       tf = mock("Tempfile", :path => "/tmp/monkey")
       @response.stub!(:file).and_return(tf)
-      @options[:raw_response] = true
-      @rest.request(:get, 'http://example.com', @options).should == tf
+      options[:raw_response] = true
+      @rest.request(:get, 'http://example.com', options).should == tf
     end
     
     it "should return a ruby object if the response was application/json" do
       @response.stub!(:headers).and_return({ :content_type => 'application/json' })
       @response.stub!(:to_s).and_return('{ "some":"value" }')
-      results = @rest.request(:get, 'http://example.com', @options)
+      results = @rest.request(:get, 'http://example.com', options)
       results.should == { 'some' => 'value' }
     end
     
     it "should return the response body otherwise" do
       @response.stub!(:to_s).and_return('what you give')
-      results = @rest.request(:get, 'http://example.com', @options)
+      results = @rest.request(:get, 'http://example.com', options)
       results.should == "what you give"
+    end
+
+    it "should build an authentication signature when asked" do
+      options = { :timestamp=>Time.now.utc.iso8601, :user_id => "bobo_t_clown", :authenticate=>true, :user_secret=>"ook"}
+      results = @rest.request(:get, 'http://example.com', options)
+      options[:headers][:authorization].should_not be_empty
     end
   end
 end
