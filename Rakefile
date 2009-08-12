@@ -5,7 +5,7 @@ require 'date'
 require 'spec/rake/spectask'
 
 GEM = "opscode-rest"
-GEM_VERSION = "0.1.0"
+GEM_VERSION = "0.1.1"
 AUTHOR = "Opscode, Inc."
 EMAIL = "info@opscode.com"
 HOMEPAGE = "http://www.opscode.com"
