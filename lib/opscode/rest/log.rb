@@ -25,7 +25,7 @@ module Opscode
     class Log
       extend Mixlib::Log
       
-      level(Opscode::REST::Config[:log_level])
+      level = Opscode::REST::Config[:log_level]
       init(Opscode::REST::Config[:log_location])
     end
   end
