@@ -109,9 +109,10 @@ describe Opscode::REST do
     end
 
     it "should build an authentication signature when asked" do
-      options = { :timestamp=>Time.now.utc.iso8601, :user_id => "bobo_t_clown", :authenticate=>true, :user_secret=>"ook"}
+      secret_rsa = OpenSSL::PKey::RSA.generate(2048)
+      options = { :timestamp=>Time.now.utc.iso8601, :user_id => "bobo_t_clown", :authenticate=>true, :user_secret=>secret_rsa }
       results = @rest.request(:get, 'http://example.com', options)
-      options[:headers][:authorization].should_not be_empty
+      options[:headers]['X-Ops-Authorization-1'].should_not be_empty
     end
   end
 end
