@@ -191,7 +191,7 @@ module Opscode
       if options[:authenticate]
         ts = options[:timestamp] || Time.now.utc.iso8601
         body = options[:payload] || ""
-        sign_obj = Mixlib::Authentication::SignedHeaderAuth.signing_object(:http_method=>method,:body=>body,:timestamp=>ts,:user_id=>options[:user_id])
+        sign_obj = Mixlib::Authentication::SignedHeaderAuth.signing_object(:http_method=>method,:path=>url_object.path,:body=>body,:timestamp=>ts,:user_id=>options[:user_id])
         options[:headers].merge!(sign_obj.sign(options[:user_secret]))
       end
       
